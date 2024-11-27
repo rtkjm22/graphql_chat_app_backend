@@ -13,18 +13,19 @@ import { createWriteStream } from 'fs';
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(GraphqlAuthGuard)
-  @Mutation(() => User)
-  async updateProfile(
-    @Args('fullname') fullname: string,
-    @Args('file', { type: () => GraphQLUpload, nullable: true })
-    file: GraphQLUpload.FileUpload,
-    @Context() context: { req: Request },
-  ) {
-    const imageUrl = file ? await this.storeImageAndGetUrl(file) : null;
-    const userId = context.req.user.sub;
-    return this.userService.updateProfile(userId, fullname, imageUrl);
-  }
+  // TODO: 画像の送信がうまくいかない
+  // @UseGuards(GraphqlAuthGuard)
+  // @Mutation(() => User)
+  // async updateProfile(
+  //   @Args('fullname') fullname: string,
+  //   @Args('file', { type: () => GraphQLUpload, nullable: true })
+  //   file: GraphQLUpload.FileUpload,
+  //   @Context() context: { req: Request },
+  // ) {
+  //   const imageUrl = file ? await this.storeImageAndGetUrl(file) : null;
+  //   const userId = context.req.user.sub;
+  //   return this.userService.updateProfile(userId, fullname, imageUrl);
+  // }
 
   private async storeImageAndGetUrl(file: GraphQLUpload.FileUpload) {
     const { createReadStream, filename } = await file;
@@ -33,6 +34,6 @@ export class UserResolver {
     const imageUrl = `${process.env.APP_URL}/${uniqueFilename}`;
     const readStream = createReadStream();
     readStream.pipe(createWriteStream(imagePath));
-    return imageUrl
+    return imageUrl;
   }
 }
