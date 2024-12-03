@@ -2,6 +2,15 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Chatroom {
+  createdAt: DateTime
+  id: ID
+  messages: [Message!]
+  name: String
+  updatedAt: DateTime
+  users: [User!]
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -16,14 +25,30 @@ type LoginResponse {
   user: User!
 }
 
+type Message {
+  chatroom: Chatroom
+  content: String
+  createdAt: DateTime
+  id: ID
+  imageUrl: String
+  updatedAt: DateTime
+  user: User
+}
+
 type Mutation {
+  addUsersToChatroom(chatroomId: Float!, userIds: [Float!]!): Chatroom!
+  createChatroom(name: String!): Chatroom!
+  deleteChatroom(chatroomId: Float!): String!
   login(loginInput: LoginDto!): LoginResponse!
   logout: String!
   refreshToken: String!
   register(registerInput: RegisterDto!): RegisterResponse!
+  updateProfile(file: Upload, fullname: String!): User!
 }
 
 type Query {
+  getChatroomsForUser(userId: Float!): [Chatroom!]!
+  getMessageForChatroom(chatroomId: Float!): [Message!]!
   hello: String!
 }
 
@@ -37,6 +62,9 @@ input RegisterDto {
 type RegisterResponse {
   user: User
 }
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
 
 type User {
   avatarUrl: String

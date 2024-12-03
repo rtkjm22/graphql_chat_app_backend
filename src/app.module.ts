@@ -9,6 +9,8 @@ import { join } from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { TokenService } from './token/token.service';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { ChatroomModule } from './chatroom/chatroom.module';
 
 const pubSub = new RedisPubSub({
   connection: {
@@ -22,6 +24,10 @@ const pubSub = new RedisPubSub({
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+      serveRoot: '/',
+    }),
     AuthModule,
     UserModule,
     GraphQLModule.forRootAsync({
@@ -52,12 +58,17 @@ const pubSub = new RedisPubSub({
             }
             return { user };
           },
+          context: (req, res, connection) => {
+            if (!connection) return { req, res };
+            return { req, res, user: connection.context.user, pubSub };
+          },
         };
       },
     }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ChatroomModule,
   ],
   controllers: [AppController],
   providers: [AppService, TokenService],
