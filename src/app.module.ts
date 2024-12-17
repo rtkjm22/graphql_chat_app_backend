@@ -47,6 +47,10 @@ const pubSub = new RedisPubSub({
             'graphql-ws': true,
             'subscriptions-transport-ws': true,
           },
+          // cors: {
+          //   origin: 'http://localhost:5173',
+          //   credentials: true,
+          // },
           onConnect: (connectionParams) => {
             const token = tokenService.extractToken(connectionParams);
             if (!token) {
@@ -59,8 +63,16 @@ const pubSub = new RedisPubSub({
             return { user };
           },
           context: (req, res, connection) => {
-            if (!connection) return { req, res };
-            return { req, res, user: connection.context.user, pubSub };
+            // console.log("グラフQLのコンテキストですj：", req.res.req.cookies)
+            if (connection) {
+              return {
+                req: connection.context.req,
+                res: connection.context.res,
+                user: connection.context.user,
+                pubSub,
+              };
+            }
+            return { req, res };
           },
         };
       },
