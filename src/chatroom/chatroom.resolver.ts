@@ -151,3 +151,4 @@ export class ChatroomResolver {
     return 'チャットルームの削除が成功しました。';
   }
 }
+
