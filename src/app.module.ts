@@ -9,6 +9,9 @@ import { join } from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { TokenService } from './token/token.service';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { ChatroomModule } from './chatroom/chatroom.module';
+import { LiveChatroomModule } from './live-chatroom/live-chatroom.module';
 
 const pubSub = new RedisPubSub({
   connection: {
@@ -22,6 +25,10 @@ const pubSub = new RedisPubSub({
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+      serveRoot: '/',
+    }),
     AuthModule,
     UserModule,
     GraphQLModule.forRootAsync({
@@ -41,6 +48,10 @@ const pubSub = new RedisPubSub({
             'graphql-ws': true,
             'subscriptions-transport-ws': true,
           },
+          // cors: {
+          //   origin: 'http://localhost:5173',
+          //   credentials: true,
+          // },
           onConnect: (connectionParams) => {
             const token = tokenService.extractToken(connectionParams);
             if (!token) {
@@ -52,12 +63,26 @@ const pubSub = new RedisPubSub({
             }
             return { user };
           },
+          context: (req, res, connection) => {
+            // console.log("グラフQLのコンテキストですj：", req.res.req.cookies)
+            if (connection) {
+              return {
+                req: connection.context.req,
+                res: connection.context.res,
+                user: connection.context.user,
+                pubSub,
+              };
+            }
+            return { req, res };
+          },
         };
       },
     }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ChatroomModule,
+    LiveChatroomModule,
   ],
   controllers: [AppController],
   providers: [AppService, TokenService],
