@@ -43,7 +43,7 @@ export class AuthService {
       throw new BadRequestException('ユーザーが存在しません。');
     }
 
-    const expiresIn = 15000;
+    const expiresIn = 1500000;
     const expiration = Math.floor(Date.now() / 1000) + expiresIn;
     const accessToken = this.jwtService.sign(
       { ...payload, exp: expiration },

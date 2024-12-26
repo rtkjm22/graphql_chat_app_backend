@@ -114,6 +114,7 @@ export class ChatroomResolver {
       .catch((error) => {
         console.log('Error: ', error);
       });
+    return newMessage;
   }
 
   @UseFilters(GraphQLErrorFilter)
